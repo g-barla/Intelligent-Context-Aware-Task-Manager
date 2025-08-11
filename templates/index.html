@@ -1,0 +1,72 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Intelligent Task Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 24px; }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { margin-bottom: 8px; }
+    form, .task { background: #f7f7f7; padding: 12px; border-radius: 10px; margin-bottom: 12px; }
+    input, select, button { padding: 8px; margin-right: 6px; }
+    .actions { display: inline-block; }
+    .badge { padding: 2px 8px; border-radius: 12px; background: #e0e0e0; font-size: 12px; }
+    .deadline { font-size: 12px; color: #666; }
+    .flash { padding: 8px; border-radius: 8px; background: #e8f5e9; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Intelligent Task Manager</h1>
+  <div class="nav" style="margin-bottom:10px;">
+    <a href="{{ url_for('completed') }}" style="margin-left:12px;">View Completed Tasks</a>
+  </div>
+  <p>Tasks are ordered by the AI prioritizer (fallback to heuristic if no API key).</p>
+
+  <form method="post" action="/settings">
+    <label>
+      <input type="checkbox" name="prefer_deadline" {{ 'checked' if rules.get('prefer_deadline') else '' }}>
+      Prefer deadline
+    </label>
+    <label style="margin-left:12px;">
+      <input type="checkbox" name="prefer_high_priority" {{ 'checked' if rules.get('prefer_high_priority') else '' }}>
+      Prefer high priority
+    </label>
+    <button type="submit">Save</button>
+  </form>
+
+  <form method="post" action="/add">
+    <input type="text" name="description" placeholder="Task description" required />
+    <input type="date" name="deadline" />
+    <select name="priority">
+      <option value="1">Priority 1 (High)</option>
+      <option value="2">Priority 2</option>
+      <option value="3" selected>Priority 3</option>
+      <option value="4">Priority 4</option>
+      <option value="5">Priority 5 (Low)</option>
+    </select>
+    <button type="submit">Add Task</button>
+  </form>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% for t in tasks %}
+  <div class="task">
+    <div><strong>#{{t.task_id}}.</strong> {{t.description}}</div>
+    <div class="deadline">Deadline: {{t.deadline or "—"}} | <span class="badge">P{{t.priority}}</span></div>
+    <form method="post" action="/complete/{{t.task_id}}" class="actions">
+      <button type="submit">Mark Done</button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+</body>
+</html>

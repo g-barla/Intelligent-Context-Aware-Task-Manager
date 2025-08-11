@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Completed Tasks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 24px; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .nav a { margin-left:12px; text-decoration: none; }
+    .card { background: #f7f7f7; padding: 12px; border-radius: 10px; margin-bottom: 12px; }
+    .muted { color: #666; font-size: 12px; }
+    .flash { padding: 8px; border-radius: 8px; background: #e8f5e9; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Completed Tasks</h1>
+  <div class="nav">
+    <a href="{{ url_for('index') }}">Back</a>
+    <strong style="margin-left:12px;">Completed Tasks</strong>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% if tasks %}
+    {% for t in tasks %}
+      <div class="card">
+        <div><strong>#{{t.task_id}}.</strong> {{t.description}}</div>
+        <div class="muted">Completed: {{t.completed_at or "—"}} | Priority P{{t.priority}} | Deadline {{t.deadline or "—"}}</div>
+        <form method="post" action="{{ url_for('reopen', task_id=t.task_id) }}">
+          <button type="submit">Reopen</button>
+        </form>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="muted">No completed tasks yet.</p>
+  {% endif %}
+</div>
+</body>
+</html>
