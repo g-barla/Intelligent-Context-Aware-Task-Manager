@@ -23,7 +23,12 @@
   <div class="nav" style="margin-bottom:10px;">
     <a href="{{ url_for('completed') }}" style="margin-left:12px;">View Completed Tasks</a>
   </div>
-  <p>Tasks are ordered by the AI prioritizer (fallback to heuristic if no API key).</p>
+  <p>Tasks are ordered by the
+    <strong>{{ 'AI prioritizer' if mode == 'ai' else 'heuristic prioritizer' }}</strong>
+    {% if mode == 'ai' and provider and model %}
+      · <span class="badge">via {{ provider }} — {{ model }}</span>
+    {% endif %}
+  </p>
 
   <form method="post" action="/settings">
     <label>
@@ -59,14 +64,17 @@
   {% endwith %}
 
   {% for t in tasks %}
-  <div class="task">
-    <div><strong>#{{t.task_id}}.</strong> {{t.description}}</div>
-    <div class="deadline">Deadline: {{t.deadline or "—"}} | <span class="badge">P{{t.priority}}</span></div>
-    <form method="post" action="/complete/{{t.task_id}}" class="actions">
-      <button type="submit">Mark Done</button>
-    </form>
+<div class="task">
+  <div><strong>#{{t.task_id}}.</strong> {{t.description}}</div>
+  <div class="deadline">
+    Deadline: {{t.deadline or "—"}} | <span class="badge">P{{t.priority}}</span>
   </div>
-  {% endfor %}
+  <div class="deadline">Reason: {{ t.reason or '—' }}</div>
+  <form method="post" action="/complete/{{t.task_id}}" class="actions">
+    <button type="submit">Mark Done</button>
+  </form>
+</div>
+{% endfor %}
 </div>
 </body>
 </html>

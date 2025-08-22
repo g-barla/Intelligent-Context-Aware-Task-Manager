@@ -10,16 +10,26 @@
     .nav a { margin-left:12px; text-decoration: none; }
     .card { background: #f7f7f7; padding: 12px; border-radius: 10px; margin-bottom: 12px; }
     .muted { color: #666; font-size: 12px; }
+    .badge { padding: 2px 8px; border-radius: 12px; background: #e0e0e0; font-size: 12px; }
     .flash { padding: 8px; border-radius: 8px; background: #e8f5e9; margin-bottom: 12px; }
   </style>
 </head>
 <body>
 <div class="container">
   <h1>Completed Tasks</h1>
-  <div class="nav">
-    <a href="{{ url_for('index') }}">Back</a>
-    <strong style="margin-left:12px;">Completed Tasks</strong>
+
+  <div class="nav" style="margin-bottom:10px;">
+    <a href="{{ url_for('index') }}">Open</a>
+    <strong style="margin-left:12px;">Completed</strong>
   </div>
+
+  <!-- Mode/provider/model badge -->
+  <p>Tasks were prioritized by the
+    <strong>{{ 'AI prioritizer' if mode == 'ai' else 'heuristic prioritizer' }}</strong>
+    {% if mode == 'ai' and provider and model %}
+      · <span class="badge">via {{ provider }} — {{ model }}</span>
+    {% endif %}
+  </p>
 
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -33,8 +43,13 @@
     {% for t in tasks %}
       <div class="card">
         <div><strong>#{{t.task_id}}.</strong> {{t.description}}</div>
-        <div class="muted">Completed: {{t.completed_at or "—"}} | Priority P{{t.priority}} | Deadline {{t.deadline or "—"}}</div>
-        <form method="post" action="{{ url_for('reopen', task_id=t.task_id) }}">
+        <div class="muted">
+          Completed: {{t.completed_at or "—"}} |
+          Priority P{{t.priority}} |
+          Deadline {{t.deadline or "—"}}
+        </div>
+
+        <form method="post" action="{{ url_for('reopen', task_id=t.task_id) }}" style="margin-top:8px;">
           <button type="submit">Reopen</button>
         </form>
       </div>

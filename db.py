@@ -22,6 +22,7 @@ def init_db():
             status TEXT DEFAULT 'open',
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             completed_at TEXT
+            -- If you previously added completed_reason TEXT, leaving it is fine.
         )
         '''
     )
@@ -69,6 +70,16 @@ def reopen_task(task_id):
     cur.execute(
         "UPDATE tasks SET status='open', completed_at=NULL WHERE task_id=?",
         (task_id,),
+    )
+    conn.commit()
+    conn.close()
+
+def set_completed_reason(task_id, reason):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE tasks SET completed_reason=? WHERE task_id=?",
+        (reason, task_id),
     )
     conn.commit()
     conn.close()
